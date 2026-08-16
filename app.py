@@ -24,7 +24,7 @@ def create_order(amount):
         
         # ✅ YAHAN APNI UPI ID DALO - ISSE HIDE HO JAYEGI
         if data.get('status') == 'success':
-            data['data']['upi_id'] = '9817317740@fam'  # ← APNI ID DALO
+            data['data']['upi_id'] = '**********@fam'  # ← APNI ID DALO
         
         return data
     except Exception as e:
