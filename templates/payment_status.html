@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Status - FamPay</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container status-page">
+        <div class="status-icon">⏳</div>
+        <h1>Payment Pending</h1>
+        <p>{{ message }}</p>
+        
+        <div class="detail-card">
+            <div class="detail-row">
+                <span class="label">Order ID:</span>
+                <span class="value">{{ order_id }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Status:</span>
+                <span class="value pending-text">{{ status }}</span>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <a href="/" class="btn-primary">Try Again</a>
+            <button onclick="window.location.reload()" class="btn-secondary">Refresh Status</button>
+        </div>
+    </div>
+</body>
+</html>

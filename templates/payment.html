@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - FamPay</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container payment-page">
+        <div class="header">
+            <h1>💳 <span>FamPay</span> Payment</h1>
+            <p>Complete your payment</p>
+        </div>
+        
+        <div class="payment-details">
+            <h2 style="margin-bottom: 15px;">Payment Details</h2>
+            
+            <div class="detail-card">
+                <div class="detail-row">
+                    <span class="label">Order ID:</span>
+                    <span class="value">{{ order_id }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Amount:</span>
+                    <span class="value">₹{{ "%.2f"|format(amount) }}</span>
+                </div>
+                {% if expires_at %}
+                <div class="detail-row">
+                    <span class="label">Expires:</span>
+                    <span class="value">{{ expires_at }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- QR Code -->
+            {% if qr_url %}
+            <div class="qr-section">
+                <h3>📱 Scan to Pay</h3>
+                <div class="qr-container">
+                    <img src="{{ qr_url }}" alt="Payment QR Code" class="qr-code">
+                </div>
+                <p class="qr-note">Scan with any UPI app (GPay, PhonePe, Paytm)</p>
+            </div>
+            {% endif %}
+
+            <!-- UPI -->
+            <div class="upi-section">
+                <h3>💳 Pay via UPI</h3>
+                <div class="upi-id-box">
+                    <p>Send money to this UPI ID:</p>
+                    <div class="upi-id">{{ upi_id }}</div>
+                    <button onclick="copyUPI()" class="btn-copy">📋 Copy UPI ID</button>
+                </div>
+                
+                <div class="or-divider">OR</div>
+                
+                <div class="checkout-section">
+                    <p>Use auto-checkout page:</p>
+                    <a href="{{ checkout_link }}" target="_blank" class="btn-checkout">
+                        🚀 Open Checkout Page
+                    </a>
+                    <span class="checkout-note">Auto-verifies on successful payment</span>
+                </div>
+            </div>
+
+            <!-- Auto Verify -->
+            <div class="auto-verify-section">
+                <h3>🔄 Auto-Verification</h3>
+                <p>We'll automatically check your payment status</p>
+                <button onclick="checkPayment()" class="btn-verify">Check Status Now</button>
+                <div id="verification-status" class="status-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyUPI() {
+            const upiId = document.querySelector('.upi-id').textContent;
+            navigator.clipboard.writeText(upiId).then(() => {
+                alert('✅ UPI ID copied! Please make the payment.');
+            }).catch(() => {
+                const input = document.createElement('input');
+                input.value = upiId;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                alert('✅ UPI ID copied! Please make the payment.');
+            });
+        }
+
+        function checkPayment() {
+            const statusDiv = document.getElementById('verification-status');
+            statusDiv.textContent = '⏳ Checking payment status...';
+            statusDiv.className = 'status-message loading';
+            
+            fetch('/auto-verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order_id: '{{ order_id }}' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'verified') {
+                    statusDiv.textContent = '✅ Payment Verified! Redirecting...';
+                    statusDiv.className = 'status-message success';
+                    setTimeout(() => {
+                        window.location.href = '/verify-payment?order_id={{ order_id }}';
+                    }, 1500);
+                } else {
+                    statusDiv.textContent = '⏳ Payment pending. Please complete the payment.';
+                    statusDiv.className = 'status-message pending';
+                }
+            })
+            .catch(() => {
+                statusDiv.textContent = '❌ Error checking payment status';
+                statusDiv.className = 'status-message error';
+            });
+        }
+
+        // Auto-check every 30 seconds
+        setInterval(checkPayment, 30000);
+        // Check after 5 seconds
+        setTimeout(checkPayment, 5000);
+    </script>
+</body>
+</html>

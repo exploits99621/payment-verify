@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - FamPay</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container success-page">
+        <div class="success-icon">✅</div>
+        <h1>Payment Successful!</h1>
+        <p class="subtitle">Your payment has been confirmed</p>
+        
+        <div class="detail-card">
+            <div class="detail-row">
+                <span class="label">Order ID:</span>
+                <span class="value">{{ order_id }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Amount:</span>
+                <span class="value">₹{{ "%.2f"|format(amount) }}</span>
+            </div>
+            {% if utr %}
+            <div class="detail-row">
+                <span class="label">UTR Number:</span>
+                <span class="value highlight">{{ utr }}</span>
+            </div>
+            {% endif %}
+            {% if payment_time %}
+            <div class="detail-row">
+                <span class="label">Payment Time:</span>
+                <span class="value">{{ payment_time }}</span>
+            </div>
+            {% endif %}
+            <div class="detail-row">
+                <span class="label">Status:</span>
+                <span class="value success-text">✅ Verified</span>
+            </div>
+        </div>
+        
+        <div class="notification">
+            <h3>📧 Notification Sent</h3>
+            <p>Payment confirmation has been processed successfully.</p>
+            {% if utr %}
+            <p class="small">Transaction ID: <strong>{{ utr }}</strong></p>
+            {% endif %}
+        </div>
+        
+        <div class="actions">
+            <a href="/" class="btn-primary">💳 Make Another Payment</a>
+            <button onclick="window.print()" class="btn-secondary">🖨️ Print Receipt</button>
+        </div>
+    </div>
+</body>
+</html>
