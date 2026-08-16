@@ -6,20 +6,9 @@ import os
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
-
-# ✅ Vercel production settings
-if os.environ.get('VERCEL_ENV') == 'production':
-    app.config.update(
-        SESSION_COOKIE_SECURE=True,
-        SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SAMESITE='Lax',
-    )
-
-# Static folder configuration
 app.static_folder = 'static'
 app.static_url_path = '/static'
 
-# FamPay Configuration
 FAMPAY_CONFIG = {
     'api_key': 'FAM_371735AC5A8C95B29EDB8EA7E7CD51DA57863D3C',
     'base_url': 'https://fampaygateway.site/api',
@@ -31,7 +20,13 @@ def create_order(amount):
     params = {'amount': amount, 'api_key': FAMPAY_CONFIG['api_key']}
     try:
         response = requests.get(url, params=params, timeout=30)
-        return response.json()
+        data = response.json()
+        
+        # ✅ YAHAN APNI UPI ID DALO - ISSE HIDE HO JAYEGI
+        if data.get('status') == 'success':
+            data['data']['upi_id'] = '9817317740@fam'  # ← APNI ID DALO
+        
+        return data
     except Exception as e:
         return {'status': 'error', 'message': str(e)}
 
@@ -120,9 +115,5 @@ def auto_verify():
     else:
         return jsonify({'status': 'pending', 'message': 'Payment not completed'})
 
-# For Vercel serverless
-app.debug = False
-
-# This is required for Vercel
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, host='0.0.0.0', port=5000)
