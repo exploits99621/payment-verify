@@ -44,13 +44,27 @@
             </div>
             {% endif %}
 
-            <!-- UPI -->
+            <!-- UPI - HIDDEN VERSION -->
             <div class="upi-section">
                 <h3>💳 Pay via UPI</h3>
                 <div class="upi-id-box">
                     <p>Send money to this UPI ID:</p>
-                    <div class="upi-id">{{ upi_id }}</div>
+                    <div class="upi-id">
+                        <!-- ✅ UPI ID HIDE - Sirf part dikhega -->
+                        {% if upi_id %}
+                            {% if upi_id|length > 10 %}
+                                {{ upi_id[:4] }}****{{ upi_id[-6:] }}
+                            {% else %}
+                                {{ upi_id[:3] }}**********@fam
+                            {% endif %}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </div>
                     <button onclick="copyUPI()" class="btn-copy">📋 Copy UPI ID</button>
+                    <small style="display:block; margin-top:8px; color:#888; font-size:12px;">
+                        Click copy to see full UPI ID
+                    </small>
                 </div>
                 
                 <div class="or-divider">OR</div>
@@ -76,9 +90,10 @@
 
     <script>
         function copyUPI() {
-            const upiId = document.querySelector('.upi-id').textContent;
+            // ✅ Full UPI ID copy karega (jo backend se aayi hai)
+            const upiId = '{{ upi_id }}';  // Full ID available hai
             navigator.clipboard.writeText(upiId).then(() => {
-                alert('✅ UPI ID copied! Please make the payment.');
+                alert('✅ UPI ID copied: ' + upiId);
             }).catch(() => {
                 const input = document.createElement('input');
                 input.value = upiId;
@@ -86,7 +101,7 @@
                 input.select();
                 document.execCommand('copy');
                 document.body.removeChild(input);
-                alert('✅ UPI ID copied! Please make the payment.');
+                alert('✅ UPI ID copied: ' + upiId);
             });
         }
 
@@ -119,9 +134,7 @@
             });
         }
 
-        // Auto-check every 30 seconds
         setInterval(checkPayment, 30000);
-        // Check after 5 seconds
         setTimeout(checkPayment, 5000);
     </script>
 </body>
