@@ -2,11 +2,20 @@ from flask import Flask, render_template, request, jsonify, session, url_for
 import requests
 import secrets
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
-# ✅ Static folder configuration
+# ✅ Vercel production settings
+if os.environ.get('VERCEL_ENV') == 'production':
+    app.config.update(
+        SESSION_COOKIE_SECURE=True,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+    )
+
+# Static folder configuration
 app.static_folder = 'static'
 app.static_url_path = '/static'
 
@@ -111,5 +120,9 @@ def auto_verify():
     else:
         return jsonify({'status': 'pending', 'message': 'Payment not completed'})
 
+# For Vercel serverless
+app.debug = False
+
+# This is required for Vercel
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run()
